@@ -1,120 +1,5 @@
-// UTILS
-type Split<
-  Str extends string,
-  SplitBy extends string
-> = Str extends `${infer P1}${SplitBy}${infer P2}`
-  ? [P1, ...Split<P2, SplitBy>]
-  : Str extends ""
-  ? []
-  : [Str];
-
-type Primitive = string | number | boolean | bigint;
-type Join<T extends unknown[], D extends string> = T extends []
-  ? ""
-  : T extends [Primitive]
-  ? `${T[0]}`
-  : T extends [Primitive, ...infer U]
-  ? `${T[0]}${D}${Join<U, D>}`
-  : string;
-
-type NumberMap = {
-  "0": 0;
-  "1": 1;
-  "2": 2;
-  "3": 3;
-  "4": 4;
-  "5": 5;
-  "6": 6;
-  "7": 7;
-  "8": 8;
-  "9": 9;
-  "10": 10;
-  "11": 11;
-  "12": 12;
-  "13": 13;
-  "14": 14;
-  "15": 15;
-  "16": 16;
-  "17": 17;
-  "18": 18;
-  "19": 19;
-  "20": 20;
-};
-
-type Pop<T extends unknown[]> = T extends [...infer P, infer _T] ? P : [];
-type Head<T extends unknown[]> = T extends [infer H, ...infer _P] ? H : [];
-type Head2<T extends unknown[]> = T extends [infer H1, infer H2, ...infer _P]
-  ? H2
-  : never;
-type Tail<T extends unknown[]> = T extends [infer _H, ...infer T] ? T : [];
-type TailBy<
-  T extends unknown[],
-  By extends number,
-  A extends number[] = []
-> = By extends A["length"] ? T : TailBy<Tail<T>, By, Push<A>>;
-type Push<T extends unknown[]> = [...T, 0];
-
-type Identifier<T> = {
-  type: "IDENT";
-  name: T;
-} & {};
-
-type TokenTypes = {
-  PAREN_START: "PAREN_START";
-  PAREN_END: "PAREN_END";
-  BRACKET_START: "BRACKET_START";
-  BRACKET_END: "BRACKET_END";
-  DOLLAR_CLAUSE: "DOLLAR_CLAUSE";
-  DOT: "DOT";
-  IDENT: "IDENT";
-  NUMBER: "NUMBER";
-};
-
-type TokenMap = {
-  "(": { type: TokenTypes["PAREN_START"] };
-  ")": { type: TokenTypes["PAREN_END"] };
-  "[": { type: TokenTypes["BRACKET_START"] };
-  "]": { type: TokenTypes["BRACKET_END"] };
-  $: { type: TokenTypes["DOLLAR_CLAUSE"] };
-  ".": { type: TokenTypes["DOT"] };
-};
-
-type ExtractIdentifier<
-  Acc extends string[],
-  Tok = Join<Acc, "">
-> = Tok extends keyof TokenMap
-  ? SwitchToken<Tok>
-  : Tok extends keyof NumberMap
-  ? { type: "NUMBER"; value: NumberMap[Tok] }
-  : Acc extends []
-  ? never
-  : Identifier<Tok>;
-
-type SwitchToken<T> = T extends keyof TokenMap ? TokenMap[T] : T;
-type TokenizeInternal<
-  Tokens extends string[],
-  Acc extends string[] = [],
-  Curr = Head<Tokens>
-> = Curr extends []
-  ? Acc extends []
-    ? []
-    : [ExtractIdentifier<Acc>]
-  : Curr extends keyof TokenMap
-  ? Acc["length"] extends 0
-    ? // if accumulator is empty then we can just go as single tokens
-      [SwitchToken<Curr>, ...TokenizeInternal<Tail<Tokens>>]
-    : // else extract the identifier
-      [
-        ExtractIdentifier<Acc>,
-        SwitchToken<Curr>,
-        ...TokenizeInternal<Tail<Tokens>>
-      ]
-  : [...TokenizeInternal<Tail<Tokens>, [...Acc, Extract<Curr, string>]>];
-
-type Tokenize<T extends string> = TokenizeInternal<Split<T, "">>;
-
-// type _Demo2 = Tokenize<"invoices.data">;
-// type _Demo3 = Tokenize<"invoices.data[].$where(id:2)">;
+import { Head, TailBy } from "./utils";
+import { TokenTypes, Tokenize } from "./tokenizer";
 
 // ----
 // PARSER
@@ -151,6 +36,7 @@ type IsToken<
 > = Tok["type"] extends TokenType ? true : false;
 
 // RAW Parser
+// OLD Initial attempt
 // type Parser<
 //   Obj,
 //   T extends any[],
@@ -205,6 +91,7 @@ type ParseIndexAccess<T extends any[]> = [
     >
   : never;
 
+// Second attempt
 // type ParseV2<Obj, T extends any[]> = ParseDotAccess<T> extends {
 //   left: infer L;
 //   right: infer R;
@@ -218,7 +105,6 @@ type ParseIndexAccess<T extends any[]> = [
 //   ? ParseV2<Obj[T[1]["name"]], Tail<T>>
 //   : Obj;
 
-// TODO
 type ParseAccess<T extends any[], AST = {}> = IsToken<
   Head<T>,
   "IDENT"
