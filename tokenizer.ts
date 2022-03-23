@@ -60,5 +60,5 @@ type TokenizeInternal<
 
 export type Tokenize<T extends string> = TokenizeInternal<Split<T, "">>;
 
-// type _Demo2 = Tokenize<"invoices.data">;
-// type _Demo3 = Tokenize<"invoices.data[].$where(id:2)">;
+type Demo1 = Tokenize<"invoices.data">;
+type Demo2 = Tokenize<"invoices.data[].$where(id:2)">;

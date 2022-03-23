@@ -1,7 +1,8 @@
+import { Interpret } from "./interpreter";
 import { Tokenize, TokenTypes } from "./tokenizer";
-import { Head, TailBy } from "./utils";
+import { Head, Head2, TailBy } from "./utils";
 
-type ParserError<T extends string> = T & { __brand: "ParserError" };
+export type ParserError<T extends string> = T & { __brand: "ParserError" };
 type Expect<T extends { type: keyof TokenTypes }, Type extends string, Else> = [
   T
 ] extends [never]
@@ -20,16 +21,19 @@ type Eat<T extends { type: keyof TokenTypes }, Type extends string> = Expect<
   ? T
   : Expect<T, Type, true>;
 
-type HasErrors<E extends ParserError<any>, Else> = E extends ParserError<
-  infer M
->
-  ? E
-  : Else;
-
 type IsToken<
   Tok extends { type: string },
   TokenType extends keyof TokenTypes
 > = Tok["type"] extends TokenType ? true : false;
+
+type HasErrors<
+  E extends ParserError<string>,
+  Else
+> = E extends ParserError<string> ? E : Else;
+
+type GetValueIfNoParserError<T, K> = [Exclude<T, K>] extends [never]
+  ? T
+  : Exclude<T, K>;
 
 type ParseIndexAccess<T extends any[]> = [
   Eat<T[0], "BRACKET_START">,
@@ -37,38 +41,57 @@ type ParseIndexAccess<T extends any[]> = [
     ? [Eat<T[1], "NUMBER">, Eat<T[2], "BRACKET_END">]
     : [Eat<T[1], "BRACKET_END">])
 ] extends [infer P1, infer P2, ...infer Rest]
-  ? HasErrors<
-      P1 | P2 | Rest[0],
-      P2 extends { type: "NUMBER" }
-        ? { type: "ArrayAccess"; index: P2["value"]; eat: 3 }
-        : { type: "ArrayAccess"; index: never; eat: 3 }
+  ? GetValueIfNoParserError<
+      HasErrors<
+        P1 | P2 | Rest[0],
+        P2 extends { type: "NUMBER" }
+          ? { type: "ArrayAccess"; index: P2["value"]; eat: 3 }
+          : { type: "ArrayAccess"; index: never; eat: 3 }
+      >,
+      { type: "ArrayAccess" }
     >
   : never;
 
-export type Parser<T extends any[], AST = {}> = IsToken<
-  Head<T>,
-  "IDENT"
-> extends true
-  ? Parser<TailBy<T, 1>, AST & { type: "Identifier"; value: Head<T>["name"] }>
-  : IsToken<Head<T>, "DOT"> extends true
-  ? {
-      type: "DotAccess";
-      value: AST;
-      children: Parser<TailBy<T, 1>>;
-    }
-  : IsToken<Head<T>, "BRACKET_START"> extends true
-  ? {
-      type: "ArrayAccess";
-      value: AST;
-      index: ParseIndexAccess<T>["index"];
-      children: Parser<TailBy<T, 3>>;
-    }
+export type Parser<
+  T extends any[],
+  AST = {},
+  Cursor = Head<T>,
+  LookAhead = Head2<T>
+> = IsToken<Cursor, "IDENT"> extends true
+  ? Parser<TailBy<T, 1>, AST & { type: "Identifier"; value: Cursor["name"] }>
+  : IsToken<Cursor, "DOT"> extends true
+  ? [LookAhead] extends [never]
+    ? ParserError<`Unexpected end of input, expected IDENT`>
+    : LookAhead extends { type: "IDENT" }
+    ? {
+        type: "DotAccess";
+        value: AST;
+        children: Parser<TailBy<T, 1>>;
+      }
+    : ParserError<`Expected token of type IDENT, got ${LookAhead["type"]}`>
+  : IsToken<Cursor, "BRACKET_START"> extends true
+  ? ParseIndexAccess<T> extends ParserError<string>
+    ? {
+        type: "ArrayAccess";
+        value: ParseIndexAccess<T>;
+        index: ParseIndexAccess<T>["index"];
+        children: Parser<TailBy<T, 3>>;
+      }
+    : {
+        type: "ArrayAccess";
+        value: AST;
+        index: ParseIndexAccess<T>["index"];
+        children: Parser<TailBy<T, 3>>;
+      }
+  : IsToken<Cursor, "BRACKET_END"> extends true
+  ? ParserError<"Unexpected token BRACKET_END">
+  : IsToken<Cursor, "NUMBER"> extends true
+  ? ParserError<"Unexpected token NUMBER">
   : AST;
 
-// type L2 = ParseDotAccess<Tokenize<".a">>;
-type L1 = ParseIndexAccess<Tokenize<"[0]">>;
-type L3 = Parser<Tokenize<"a.b.c[0]">>;
-
+type L3 = Parser<Tokenize<"invoices..data[0.nest">>;
+type D = ParseIndexAccess<Tokenize<"0]">>;
+type K = Interpret<{ a: { b: [0] } }, L3>;
 // OLDER ATTEMPTS
 
 // type Parser<
