@@ -1,6 +1,6 @@
 import { Interpret } from "./interpreter";
 import { Tokenize, TokenTypes } from "./tokenizer";
-import { Head, Head2, TailBy } from "./utils";
+import { Head, Head2, ParseObj, TailBy } from "./utils";
 
 export type ParserError<T extends string> = T & { __brand: "ParserError" };
 type Expect<T extends { type: keyof TokenTypes }, Type extends string, Else> = [
@@ -52,17 +52,36 @@ type ParseIndexAccess<T extends any[]> = [
     >
   : never;
 
+type ParseWhereClause<T extends any[]> = [
+  Eat<T[0], "WHERE">,
+  Eat<T[1], "PAREN_START">,
+  Eat<T[2], "IDENT">,
+  Eat<T[3], "PAREN_END">
+] extends [infer P1, infer P2, infer P3, infer P4]
+  ? GetValueIfNoParserError<
+      HasErrors<
+        P1 | P2 | P3 | P4,
+        { type: "WhereClause"; value: ParseObj<P3["name"]>; eat: 4 }
+      >,
+      { type: "WhereClause" }
+    >
+  : never;
+
+type DD = ParseWhereClause<Tokenize<"$where(a:1)">>;
+
 export type Parser<
   T extends any[],
   AST = {},
   Cursor = Head<T>,
   LookAhead = Head2<T>
-> = IsToken<Cursor, "IDENT"> extends true
+> = IsToken<Cursor, "WHERE"> extends true
+  ? Parser<TailBy<T, 4>, AST & ParseWhereClause<T>>
+  : IsToken<Cursor, "IDENT"> extends true
   ? Parser<TailBy<T, 1>, AST & { type: "Identifier"; value: Cursor["name"] }>
   : IsToken<Cursor, "DOT"> extends true
   ? [LookAhead] extends [never]
     ? ParserError<`Unexpected end of input, expected IDENT`>
-    : LookAhead extends { type: "IDENT" }
+    : LookAhead extends { type: "IDENT" | "WHERE" }
     ? {
         type: "DotAccess";
         value: AST;
@@ -89,9 +108,17 @@ export type Parser<
   ? ParserError<"Unexpected token NUMBER">
   : AST;
 
-type L3 = Parser<Tokenize<"invoices..data[0.nest">>;
-type D = ParseIndexAccess<Tokenize<"0]">>;
-type K = Interpret<{ a: { b: [0] } }, L3>;
+// type L3 = Parser<Tokenize<"invoices..data[0.nest">>;
+// type D = ParseIndexAccess<Tokenize<"0]">>;
+// type K = Interpret<{ a: { b: [0] } }, L3>;
+
+type Toks = Tokenize<"a[].$where(id:1,age:2)">;
+type AST = Parser<Toks>;
+type K = Interpret<
+  { a: [{ id: 1; age: 2; name: "one" }, { id: 2; age: 2; name: "two" }] },
+  AST
+>;
+
 // OLDER ATTEMPTS
 
 // type Parser<

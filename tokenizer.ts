@@ -14,6 +14,7 @@ export type TokenTypes = {
   DOT: "DOT";
   IDENT: "IDENT";
   NUMBER: "NUMBER";
+  WHERE: "WHERE";
 };
 
 export type TokenMap = {
@@ -21,7 +22,7 @@ export type TokenMap = {
   ")": { type: TokenTypes["PAREN_END"] };
   "[": { type: TokenTypes["BRACKET_START"] };
   "]": { type: TokenTypes["BRACKET_END"] };
-  $: { type: TokenTypes["DOLLAR_CLAUSE"] };
+  "$where": { type: TokenTypes["WHERE"] };
   ".": { type: TokenTypes["DOT"] };
 };
 
@@ -35,6 +36,8 @@ type ExtractIdentifier<
   : Acc extends []
   ? never
   : Identifier<Tok>;
+
+type E = ExtractIdentifier<['where']>
 
 type SwitchToken<T> = T extends keyof TokenMap ? TokenMap[T] : T;
 
@@ -60,5 +63,6 @@ type TokenizeInternal<
 
 export type Tokenize<T extends string> = TokenizeInternal<Split<T, "">>;
 
-type Demo1 = Tokenize<"invoices.data">;
+type Demo1 = Tokenize<"invoices.$where(1)">;
 type Demo2 = Tokenize<"invoices.data[].$where(id:2)">;
+// type Demo3 = Tokenize<"comments[].$where(id:abcdefghijklm)">;

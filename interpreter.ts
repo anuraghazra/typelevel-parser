@@ -1,4 +1,6 @@
-import { ParserError } from "./parser";
+import { Parser, ParserError } from "./parser";
+import { Tokenize } from "./tokenizer";
+import { GetByField, TuplifyUnion, UnionToIntersection } from "./utils";
 
 type PushError<Errors extends any[], AST> = AST extends ParserError<infer E>
   ? [...Errors, E]
@@ -34,6 +36,29 @@ export type Interpret<
     : Ident extends ParserError<string>
     ? Interpret<Obj[Index], Ident, PushError<Errors, Ident>>
     : Interpret<Obj[Index], Children, PushError<Errors, Ident>>
+  : AST extends {
+      type: "WhereClause";
+      value: infer FilterBy;
+    }
+  ? Interpret<
+      TuplifyUnion<GetByField<Obj, FilterBy>>,
+      {},
+      PushError<Errors, FilterBy>
+    >
   : Errors extends []
   ? Obj
   : Errors;
+
+type Toks = Tokenize<"comments[].$where(name:anurag)">;
+type AST = Parser<Toks>;
+
+type Demo = Interpret<
+  {
+    comments: [
+      { id: "uid1"; name: "anurag"; content: "this is a comments" },
+      { id: "uid2"; name: "anurag"; content: "type level parser" },
+      { id: "uid3"; name: "jhon"; content: "ts ftw" }
+    ];
+  },
+  AST
+>;

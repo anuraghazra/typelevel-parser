@@ -1,23 +1,34 @@
 import { Tokenize } from "./tokenizer";
 import { Parser } from "./parser";
 import { Interpret } from "./interpreter";
+import { ParseObj } from "./utils";
 
 const obj2 = {
-  invoices: {
-    data: [
-      {
-        id: 2,
-        name: "nice",
-        nest: {
-          data: ["nested a", [{ a: { b: { c: "WOAAAHHH I reached here!" } } }]],
-        },
-      },
-      { id: 3, name: "nice", nest: { data: "nested b" } },
-    ],
-  },
+  comments: [
+    {
+      id: 1,
+      content: "Content 1",
+      user: { login: "anuraghazra" },
+    },
+    {
+      id: 2,
+      content: "Content 2",
+      user: { login: "anuraghazra" },
+    },
+    {
+      id: 3,
+      content: "Content 3",
+      user: { login: "jhondoe" },
+    },
+    {
+      id: 4,
+      content: "Content 4",
+      user: { login: "jhondoe" },
+    },
+  ],
 } as const;
 
-type Toks = Tokenize<"invoices.data[0].nest.data[1][0].a.b.c">;
+type Toks = Tokenize<"a[].$where(id:1).$where(a:a)">;
 type AST = Parser<Toks>;
 
 type Demo = Interpret<typeof obj2, AST>;
