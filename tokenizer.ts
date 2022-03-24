@@ -22,9 +22,10 @@ export type TokenMap = {
   ")": { type: TokenTypes["PAREN_END"] };
   "[": { type: TokenTypes["BRACKET_START"] };
   "]": { type: TokenTypes["BRACKET_END"] };
-  "$where": { type: TokenTypes["WHERE"] };
+  $where: { type: TokenTypes["WHERE"] };
   ".": { type: TokenTypes["DOT"] };
 };
+export type Token = { type: keyof TokenTypes; [x: string]: any };
 
 type ExtractIdentifier<
   Acc extends string[],
@@ -36,8 +37,6 @@ type ExtractIdentifier<
   : Acc extends []
   ? never
   : Identifier<Tok>;
-
-type E = ExtractIdentifier<['where']>
 
 type SwitchToken<T> = T extends keyof TokenMap ? TokenMap[T] : T;
 

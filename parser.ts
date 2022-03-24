@@ -1,5 +1,5 @@
 import { Interpret } from "./interpreter";
-import { Tokenize, TokenTypes } from "./tokenizer";
+import { Token, Tokenize, TokenTypes } from "./tokenizer";
 import { Head, Head2, ParseObj, TailBy } from "./utils";
 
 export type ParserError<T extends string> = T & { __brand: "ParserError" };
@@ -22,14 +22,13 @@ type Eat<T extends { type: keyof TokenTypes }, Type extends string> = Expect<
   : Expect<T, Type, true>;
 
 type IsToken<
-  Tok extends { type: string },
+  Tok extends { type: keyof TokenTypes },
   TokenType extends keyof TokenTypes
 > = Tok["type"] extends TokenType ? true : false;
 
-type HasErrors<
-  E extends ParserError<string>,
-  Else
-> = E extends ParserError<string> ? E : Else;
+type HasErrors<Value extends unknown, Else> = Value extends ParserError<string>
+  ? Value
+  : Else;
 
 type GetValueIfNoParserError<T, K> = [Exclude<T, K>] extends [never]
   ? T
@@ -44,8 +43,8 @@ type ParseIndexAccess<T extends any[]> = [
   ? GetValueIfNoParserError<
       HasErrors<
         P1 | P2 | Rest[0],
-        P2 extends { type: "NUMBER" }
-          ? { type: "ArrayAccess"; index: P2["value"]; eat: 3 }
+        P2 extends { type: "NUMBER"; value: infer Index }
+          ? { type: "ArrayAccess"; index: Index; eat: 3 }
           : { type: "ArrayAccess"; index: never; eat: 3 }
       >,
       { type: "ArrayAccess" }
@@ -61,21 +60,21 @@ type ParseWhereClause<T extends any[]> = [
   ? GetValueIfNoParserError<
       HasErrors<
         P1 | P2 | P3 | P4,
-        { type: "WhereClause"; value: ParseObj<P3["name"]>; eat: 4 }
+        P3 extends { type: "IDENT"; name: infer Name }
+          ? { type: "WhereClause"; value: ParseObj<Name & string>; eat: 4 }
+          : { type: "WhereClause"; value: {}; eat: 4 }
       >,
       { type: "WhereClause" }
     >
   : never;
 
-type DD = ParseWhereClause<Tokenize<"$where(a:1)">>;
-
 export type Parser<
-  T extends any[],
+  T extends Token[],
   AST = {},
-  Cursor = Head<T>,
-  LookAhead = Head2<T>
+  Cursor extends Token = Head<T>,
+  LookAhead extends Token = Head2<T>
 > = IsToken<Cursor, "WHERE"> extends true
-  ? Parser<TailBy<T, 4>, AST & ParseWhereClause<T>>
+  ? Parser<TailBy<T, 4>, ParseWhereClause<T>>
   : IsToken<Cursor, "IDENT"> extends true
   ? Parser<TailBy<T, 1>, AST & { type: "Identifier"; value: Cursor["name"] }>
   : IsToken<Cursor, "DOT"> extends true
@@ -112,10 +111,16 @@ export type Parser<
 // type D = ParseIndexAccess<Tokenize<"0]">>;
 // type K = Interpret<{ a: { b: [0] } }, L3>;
 
-type Toks = Tokenize<"a[].$where(id:1,age:2)">;
+// TODO Throw error on where syntax
+type Toks = Tokenize<"b[].$where().i[].$where(id:i11)">;
 type AST = Parser<Toks>;
 type K = Interpret<
-  { a: [{ id: 1; age: 2; name: "one" }, { id: 2; age: 2; name: "two" }] },
+  {
+    b: [
+      { id: 1; i: [{ id: "i11" }, { id: "i12" }] },
+      { id: 2; i: [{ id: "i21" }, { id: "i22" }] }
+    ];
+  },
   AST
 >;
 

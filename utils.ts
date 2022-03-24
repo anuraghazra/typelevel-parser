@@ -82,6 +82,7 @@ export type TuplifyUnion<
   N = [T] extends [never] ? true : false
 > = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>;
 
+export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
 export type GetByField<T, Query> = Extract<T, Query>;
 export type ParseObj<
   ObjStr extends string,

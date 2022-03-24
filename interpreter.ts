@@ -1,13 +1,13 @@
 import { Parser, ParserError } from "./parser";
 import { Tokenize } from "./tokenizer";
-import { GetByField, TuplifyUnion, UnionToIntersection } from "./utils";
+import { GetByField, IsUnion, TuplifyUnion } from "./utils";
 
 type PushError<Errors extends any[], AST> = AST extends ParserError<infer E>
   ? [...Errors, E]
   : [];
 
 export type Interpret<
-  Obj,
+  Obj extends Record<any, any>,
   AST,
   Errors extends string[] = []
 > = AST extends ParserError<infer Err>
@@ -41,7 +41,9 @@ export type Interpret<
       value: infer FilterBy;
     }
   ? Interpret<
-      TuplifyUnion<GetByField<Obj, FilterBy>>,
+      IsUnion<GetByField<Obj, FilterBy>> extends true
+        ? TuplifyUnion<GetByField<Obj, FilterBy>>
+        : GetByField<Obj, FilterBy>,
       {},
       PushError<Errors, FilterBy>
     >
