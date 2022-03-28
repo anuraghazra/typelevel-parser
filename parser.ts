@@ -2,7 +2,8 @@ import { Interpret } from "./interpreter";
 import { Token, Tokenize, TokenTypes } from "./tokenizer";
 import { Head, Head2, ParseObj, TailBy } from "./utils";
 
-export type ParserError<T extends string> = T & { __brand: "ParserError" };
+declare const ErrorBrand: unique symbol;
+export type ParserError<T extends string> = T & { __brand: typeof ErrorBrand };
 type Expect<T extends { type: keyof TokenTypes }, Type extends string, Else> = [
   T
 ] extends [never]

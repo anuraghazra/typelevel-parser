@@ -1,19 +1,19 @@
 import { Tokenize } from "./tokenizer";
 import { Parser } from "./parser";
 import { Interpret } from "./interpreter";
-import { ParseObj } from "./utils";
+import { PathAutocomplete } from "./autocomplete";
 
 const obj2 = {
   comments: [
     {
       id: 1,
       content: "Content 1",
-      user: { login: "anuraghazra" },
+      user: { login: "ah" },
     },
     {
       id: 2,
       content: "Content 2",
-      user: { login: "anuraghazra" },
+      user: { login: "ah" },
     },
     {
       id: 3,
@@ -26,18 +26,24 @@ const obj2 = {
       user: { login: "jhondoe" },
     },
   ],
+  user: {
+    a: {
+      b: 1,
+    },
+  },
 } as const;
 
-type Toks = Tokenize<"a[].$where(id:1).$where(a:a)">;
+type Toks = Tokenize<"comments[].$where(id:1)">;
 type AST = Parser<Toks>;
-
 type Demo = Interpret<typeof obj2, AST>;
 
-function get<Obj, T extends string>(
+type PathDemo = PathAutocomplete<typeof obj2>;
+
+function get<Obj, T>(
   obj: Obj,
-  path: T
-): Interpret<Obj, Parser<Tokenize<T>>> {
-  return {} as Interpret<Obj, Parser<Tokenize<T>>>;
+  path: T | PathAutocomplete<Obj>
+): Interpret<Obj, Parser<Tokenize<T & string>>> {
+  return {} as Interpret<Obj, Parser<Tokenize<T & string>>>;
 }
 
-const t = get({ a: { b: [{ c: { d: 1 } }] } }, "a.b[0]");
+const t = get(obj2, "comments[].$where(id:1)");
