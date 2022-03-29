@@ -113,7 +113,7 @@ export type Parser<
 // type K = Interpret<{ a: { b: [0] } }, L3>;
 
 // TODO Throw error on where syntax
-type Toks = Tokenize<"b[].$where().i[].$where(id:i11)">;
+type Toks = Tokenize<"b[0].i[0].id">;
 type AST = Parser<Toks>;
 type K = Interpret<
   {

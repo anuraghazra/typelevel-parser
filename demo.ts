@@ -4,7 +4,7 @@ import { Tokenize } from "./tokenizer";
 
 type Run<T extends string> = Interpret<{}, Parser<Tokenize<T>>>
 
-type Demo1 = Run<'a.'>;
+type Demo1 = Run<'a.b.c'>;
 //   ^? "Unexpected end of input, expected IDENT"
 type Demo2 = Run<'a.b['>;
 //   ^? "Unexpected end of input, Expected token of type BRACKET_END"

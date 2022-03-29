@@ -1,20 +1,23 @@
 // UTILS
 export type Split<
   Str extends string,
-  SplitBy extends string
+  SplitBy extends string,
+  Acc extends string[] = []
 > = Str extends `${infer P1}${SplitBy}${infer P2}`
-  ? [P1, ...Split<P2, SplitBy>]
-  : Str extends ""
-  ? []
-  : [Str];
+  ? Split<P2, SplitBy, [...Acc, P1]>
+  : Acc;
 
 export type Primitive = string | number | boolean | bigint;
-export type Join<T extends unknown[], D extends string> = T extends []
+export type Join<
+  T extends unknown[],
+  D extends string,
+  Acc extends string = ""
+> = T extends []
   ? ""
   : T extends [Primitive]
-  ? `${T[0]}`
+  ? `${Acc}${T[0]}`
   : T extends [Primitive, ...infer U]
-  ? `${T[0]}${D}${Join<U, D>}`
+  ? Join<U, D, `${Acc}${T[0]}${D}`>
   : string;
 
 export type NumberMap = {
@@ -83,7 +86,8 @@ export type TuplifyUnion<
 > = true extends N ? [] : Push<TuplifyUnion<Exclude<T, L>>, L>;
 
 export type IsUnion<T> = [T] extends [UnionToIntersection<T>] ? false : true;
-export type GetByField<T, Query> = Extract<T, Query>;
+export type GetByField<T, Query> = Extract<T, Partial<Query>>;
+
 export type ParseObj<
   ObjStr extends string,
   Splitted extends string[] = Split<ObjStr, ",">
@@ -103,4 +107,4 @@ export type ParseObj<
   }[Splitted[number]]
 >;
 
-type D = ParseObj<'id:1,age:2'>
+type D = ParseObj<"id:1,age:2">;

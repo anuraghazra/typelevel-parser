@@ -7,34 +7,30 @@ const obj2 = {
   comments: [
     {
       id: 1,
+      uid: "ah",
       content: "Content 1",
-      user: { login: "ah" },
     },
     {
       id: 2,
+      uid: "ah",
       content: "Content 2",
-      user: { login: "ah" },
     },
     {
       id: 3,
+      uid: "jd",
       content: "Content 3",
-      user: { login: "jhondoe" },
     },
     {
       id: 4,
+      uid: "jd",
       content: "Content 4",
-      user: { login: "jhondoe" },
     },
   ],
-  user: {
-    a: {
-      b: 1,
-    },
-  },
 } as const;
 
-type Toks = Tokenize<"comments[].$where(id:1)">;
+type Toks = Tokenize<"comments[].$where(uid:ah)">;
 type AST = Parser<Toks>;
+
 type Demo = Interpret<typeof obj2, AST>;
 
 type PathDemo = PathAutocomplete<typeof obj2>;
@@ -46,4 +42,53 @@ function get<Obj, T>(
   return {} as Interpret<Obj, Parser<Tokenize<T & string>>>;
 }
 
-const t = get(obj2, "comments[].$where(id:1)");
+type Test1 = Tokenize<"commentsssssssssssssssss.invoices.data.users.nice.work.here.fa">;
+type Test2 = Tokenize<"comments.invoices.anurag.hazra.abcdefghijklm.a">;
+type ASTLimit = Parser<Test1>;
+
+const t = get(
+  {
+    commentsssssssssssssssss: {
+      nest: {
+        child: {
+          nest: {
+            child: {
+              nest: {
+                child: {
+                  nest: {
+                    child: {
+                      nest: {
+                        child: {
+                          nest: {
+                            child: {
+                              nest: {
+                                child: {
+                                  nest: {
+                                    child: {
+                                      nest: {
+                                        child: {
+                                          nest: {
+                                            child: [1, 2, 3],
+                                          },
+                                        },
+                                      },
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  } as const,
+  "commentsssssssssssssssss.nest.child.nest.child.nest.child.nest.child.nest.child.nest.child.nest.child.nest.child.nest.child.nest.child[]"
+);
