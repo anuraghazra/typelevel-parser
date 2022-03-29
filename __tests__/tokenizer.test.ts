@@ -1,25 +1,26 @@
 import { Tokenize } from "../tokenizer";
 import { Equal, Expect } from "./test-utils";
 
-type EmptyString = Tokenize<"">;
-type SingleIdent = Tokenize<"hello">;
-type LongIdent =
+export type TestEmptyString = Tokenize<"">;
+export type TestSingleIdent = Tokenize<"hello">;
+export type TestLongIdent =
   Tokenize<"helooooooooooooooooooooooooooooooooooooooooooooooooooooo">;
-type DotAccess = Tokenize<"a.b">;
-type MultipleDotAccess = Tokenize<"a.b.c.d">;
-type ArrayAccess = Tokenize<"a[]">;
-type ArrayIndexAccess = Tokenize<"a[0]">;
-type ArrayAccessDotAccess = Tokenize<"a[0].id">;
-type MultipleArrayAccess = Tokenize<"a[][][][0]">;
-type WhereClause = Tokenize<"a[].$where(id:1)">;
-type WhereClauseDot = Tokenize<"a[].$where(id:1).id">;
-type MultiWhereClause = Tokenize<"a[].$where(id:1).users[].$where(id:2)">;
+export type TestDotAccess = Tokenize<"a.b">;
+export type TestMultipleDotAccess = Tokenize<"a.b.c.d">;
+export type TestArrayAccess = Tokenize<"a[]">;
+export type TestArrayIndexAccess = Tokenize<"a[0]">;
+export type TestArrayAccessDotAccess = Tokenize<"a[0].id">;
+export type TestMultipleArrayAccess = Tokenize<"a[0][1][2][3]">;
+export type TestWhereClause = Tokenize<"a[].$where(id:1)">;
+export type TestWhereClauseDot = Tokenize<"a[].$where(id:1).id">;
+export type TestMultiWhereClause =
+  Tokenize<"a[].$where(id:1).users[].$where(id:2)">;
 
 type Tests = [
-  Expect<Equal<EmptyString, []>>,
+  Expect<Equal<TestEmptyString, []>>,
   Expect<
     Equal<
-      SingleIdent,
+      TestSingleIdent,
       [
         {
           type: "IDENT";
@@ -30,7 +31,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      LongIdent,
+      TestLongIdent,
       [
         {
           type: "IDENT";
@@ -41,7 +42,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      DotAccess,
+      TestDotAccess,
       [
         {
           type: "IDENT";
@@ -59,7 +60,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      MultipleDotAccess,
+      TestMultipleDotAccess,
       [
         {
           type: "IDENT";
@@ -91,7 +92,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ArrayAccess,
+      TestArrayAccess,
       [
         {
           type: "IDENT";
@@ -108,7 +109,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ArrayIndexAccess,
+      TestArrayIndexAccess,
       [
         {
           type: "IDENT";
@@ -129,7 +130,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      ArrayAccessDotAccess,
+      TestArrayAccessDotAccess,
       [
         {
           type: "IDENT";
@@ -157,29 +158,11 @@ type Tests = [
   >,
   Expect<
     Equal<
-      MultipleArrayAccess,
+      TestMultipleArrayAccess,
       [
         {
           type: "IDENT";
           name: "a";
-        },
-        {
-          type: "BRACKET_START";
-        },
-        {
-          type: "BRACKET_END";
-        },
-        {
-          type: "BRACKET_START";
-        },
-        {
-          type: "BRACKET_END";
-        },
-        {
-          type: "BRACKET_START";
-        },
-        {
-          type: "BRACKET_END";
         },
         {
           type: "BRACKET_START";
@@ -190,13 +173,43 @@ type Tests = [
         },
         {
           type: "BRACKET_END";
+        },
+        {
+          type: "BRACKET_START";
+        },
+        {
+          type: "NUMBER";
+          value: 1;
+        },
+        {
+          type: "BRACKET_END";
+        },
+        {
+          type: "BRACKET_START";
+        },
+        {
+          type: "NUMBER";
+          value: 2;
+        },
+        {
+          type: "BRACKET_END";
+        },
+        {
+          type: "BRACKET_START";
+        },
+        {
+          type: "NUMBER";
+          value: 3;
+        },
+        {
+          type: "BRACKET_END";
         }
       ]
     >
   >,
   Expect<
     Equal<
-      WhereClause,
+      TestWhereClause,
       [
         {
           type: "IDENT";
@@ -229,7 +242,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      WhereClauseDot,
+      TestWhereClauseDot,
       [
         {
           type: "IDENT";
@@ -269,7 +282,7 @@ type Tests = [
   >,
   Expect<
     Equal<
-      MultiWhereClause,
+      TestMultiWhereClause,
       [
         {
           type: "IDENT";
