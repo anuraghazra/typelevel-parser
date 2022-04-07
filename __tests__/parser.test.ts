@@ -204,7 +204,9 @@ type HappyPaths = [
         index: never;
         children: {
           type: "WhereClause";
-          value: unknown;
+          value: {
+            id: 1;
+          };
           eat: 4;
         };
       }
@@ -224,7 +226,9 @@ type HappyPaths = [
           type: "DotAccess";
           value: {
             type: "WhereClause";
-            value: unknown;
+            value: {
+              id: 1;
+            };
             eat: 4;
           };
           children: {
@@ -249,7 +253,9 @@ type HappyPaths = [
           type: "DotAccess";
           value: {
             type: "WhereClause";
-            value: unknown;
+            value: {
+              id: 1;
+            };
             eat: 4;
           };
           children: {
@@ -261,7 +267,9 @@ type HappyPaths = [
             index: never;
             children: {
               type: "WhereClause";
-              value: unknown;
+              value: {
+                id: 2;
+              };
               eat: 4;
             };
           };

@@ -1,3 +1,4 @@
+// Autocomplete is not ready yet
 import { NumberMap } from "./utils";
 
 type ArrayKeys = keyof (readonly [] | any[]);
@@ -42,4 +43,6 @@ type PathRecursive<T, Key extends keyof T> = Key extends string
     : Key
   : never;
 
-export type PathAutocomplete<T> = PathRecursive<T, keyof T> | keyof T;
+export type PathAutocomplete<T> =
+  | (PathRecursive<T, keyof T> | keyof T)
+  | (string & {});

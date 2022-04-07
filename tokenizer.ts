@@ -74,6 +74,5 @@ type TokenizeInternal<
 
 export type Tokenize<T extends string> = TokenizeInternal<Split<T, "">>;
 
-type Demo1 = Tokenize<"abc.invoices.data.users.nice.work.here.fa">;
-type Demo2 = Tokenize<"invoices.data[].$where(id:2)">;
-// type Demo3 = Tokenize<"comments[].$where(id:abcdefghijklm)">;
+type Demo1 = Tokenize<"hello.world.this.is.typescript[].$where(is:awesome)">;
+type Demo2 = Tokenize<"comments[].$where(id:3)">;

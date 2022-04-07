@@ -3,9 +3,11 @@ export type Split<
   Str extends string,
   SplitBy extends string,
   Acc extends string[] = []
-> = Str extends `${infer P1}${SplitBy}${infer P2}`
+> = Str extends ""
+  ? Acc
+  : Str extends `${infer P1}${SplitBy}${infer P2}`
   ? Split<P2, SplitBy, [...Acc, P1]>
-  : Acc;
+  : [...Acc, Str];
 
 export type Primitive = string | number | boolean | bigint;
 export type Join<
@@ -106,5 +108,3 @@ export type ParseObj<
       : {};
   }[Splitted[number]]
 >;
-
-type D = ParseObj<"id:1,age:2">;

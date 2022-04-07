@@ -1,4 +1,3 @@
-import { Interpret } from "./interpreter";
 import { Token, Tokenize, TokenTypes } from "./tokenizer";
 import { Head, Head2, ParseObj, TailBy } from "./utils";
 
@@ -108,75 +107,5 @@ export type Parser<
   ? ParserError<"Unexpected token NUMBER">
   : AST;
 
-// type L3 = Parser<Tokenize<"invoices..data[0.nest">>;
-// type D = ParseIndexAccess<Tokenize<"0]">>;
-// type K = Interpret<{ a: { b: [0] } }, L3>;
-
-// TODO Throw error on where syntax
-type Toks = Tokenize<"b[0].i[0].id">;
-type AST = Parser<Toks>;
-type K = Interpret<
-  {
-    b: [
-      { id: 1; i: [{ id: "i11" }, { id: "i12" }] },
-      { id: 2; i: [{ id: "i21" }, { id: "i22" }] }
-    ];
-  },
-  AST
->;
-
-// OLDER ATTEMPTS
-
-// type Parser<
-//   Obj,
-//   T extends any[],
-//   Curr extends { type: string } = Head<T>,
-//   LookAhead extends { type: keyof TokenTypes } = Head2<T>
-// > = T extends []
-//   ? Obj
-//   : IsToken<Curr, "IDENT"> extends true
-//   ? Parser<
-//       Obj[Curr["name"]] extends any[]
-//         ? IsToken<LookAhead, "NUMBER"> extends false
-//           ? Obj[Curr["name"]][number]
-//           : Obj[Curr["name"]]
-//         : Obj[Curr["name"]],
-//       Tail<T>
-//     >
-//   : IsToken<Curr, "DOT"> extends true
-//   ? Parser<Obj extends any[] ? Obj[number] : Obj, Tail<T>>
-//   : IsToken<Curr, "BRACKET_START"> extends true
-//   ? Expect<LookAhead, "NUMBER" | "BRACKET_END", Parser<Obj, Tail<T>>>
-//   : IsToken<Curr, "BRACKET_END"> extends true
-//   ? Parser<Obj, Tail<T>>
-//   : IsToken<Curr, "NUMBER"> extends true
-//   ? Expect<LookAhead, "BRACKET_END", Parser<Obj[Curr["value"]], Tail<T>>>
-//   : Obj;
-
-// type ParseDotAccess<T extends any[]> = [
-//   Eat<T[0], "IDENT">,
-//   Eat<T[1], "DOT">
-// ] extends [infer A, infer Dot]
-//   ? Dot extends ParserError<infer E>
-//     ? { type: "Access"; name: A["name"]; eat: 1 }
-//     : {
-//         eat: 3;
-//         type: "DotAccess";
-//         left: A;
-//         right: ParseDotAccess<Tail<Tail<T>>>;
-//       }
-//   : never;
-
-// Second attempt
-// type ParseV2<Obj, T extends any[]> = ParseDotAccess<T> extends {
-//   left: infer L;
-//   right: infer R;
-// }
-//   ? L extends { type: "IDENT" }
-//     ? ParseV2<Obj[L["name"]], Tail<Tail<Tail<T>>>>
-//     : [L, R]
-//   : ParseIndexAccess<T> extends { index: infer Index }
-//   ? ParseV2<Obj[Index], Tail<Tail<Tail<T>>>>
-//   : T[0] extends { type: "DOT" }
-//   ? ParseV2<Obj[T[1]["name"]], Tail<T>>
-//   : Obj;
+type Demo1 = Parser<Tokenize<"hello.world.this.is.typescript[].$where(is:awesome)">>;
+type Demo2 = Parser<Tokenize<"comments[].$where(id:3)">>;
