@@ -1,0 +1,19 @@
+{
+  "name": "ts-typelevel-dsl",
+  "version": "1.0.0",
+  "description": "This is my experiment to push the limits of TypeScript's type system by writing a \"real\" tokenizer/parser/interpreter entirely on type-level.",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/HazraAnurag/ts-object-path-parser.git"
+  },
+  "author": "Aunrag Hazra (hazru.anurag@gmail.com)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/HazraAnurag/ts-object-path-parser/issues"
+  },
+  "homepage": "https://github.com/HazraAnurag/ts-object-path-parser#readme",
+  "devDependencies": {
+    "typescript": "^4.6.3"
+  }
+}
