@@ -16,7 +16,10 @@ It's quite similar to how `lodash.get` syntax works but with a bit more flare, w
 
 ### Demo
 
-Clone this repo and open [demo.ts](./demo.ts) file to explore the wonders!
+Use [TSPlayground](https://tsplay.dev/N9EE3N)
+
+Or clone this repo and open [demo.ts](./demo.ts) file to explore the wonders!
+
 
 You can also open each of the modules separately to see how the [tokenizer](./tokenizer.ts), [parser](./parser.ts) and [interpreter](./interpreter.ts) works, I've added small demos on each time.
 
